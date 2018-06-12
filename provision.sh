@@ -49,7 +49,7 @@ etcd:
    extraArgs:
        'listen-peer-urls': 'http://127.0.0.1:2380'
 api:
-  advertiseAddress: echo $1
+  advertiseAddress: $1
 networkin:
   podSubnet: 10.244.0.0/16
 EOF
@@ -62,13 +62,16 @@ systemctl  restart kubelet && systemctl enable kubelet
     sed -i 's/\(.*swap.*\)/#\1/g' /etc/fstab
     swapoff -a
     kubeadm reset
-#    kubeadm init --config=kubeadm.yaml
-#    kubectl apply -n kube-system -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
+    kubeadm init --config=kubeadm.yaml
+    sudo cp /etc/kubernetes/admin.conf $HOME/
+sudo chown $(id -u):$(id -g) $HOME/admin.conf
+export KUBECONFIG=$HOME/admin.conf
+    kubectl apply -n kube-system -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     
-#    git clone https://github.com/kubernetes/heapster.git
-#    cd heapster/
-#    kubectl create -f deploy/kube-config/influxdb/
-#    kubectl apply -f https://github.com/kubernetes/heapster/raw/master/deploy/kube-config/rbac/heapster-rbac.yaml
-#    kubectl apply -f https://github.com/kubernetes/heapster/raw/master/deploy/kube-config/influxdb/heapster.yaml
-#    kubectl apply -f https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/influxdb/influxdb.yaml
+    git clone https://github.com/kubernetes/heapster.git
+    cd heapster/
+    kubectl create -f deploy/kube-config/influxdb/
+    kubectl apply -f https://github.com/kubernetes/heapster/raw/master/deploy/kube-config/rbac/heapster-rbac.yaml
+    kubectl apply -f https://github.com/kubernetes/heapster/raw/master/deploy/kube-config/influxdb/heapster.yaml
+    kubectl apply -f https://raw.githubusercontent.com/kubernetes/heapster/master/deploy/kube-config/influxdb/influxdb.yaml
      

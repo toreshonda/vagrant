@@ -36,6 +36,7 @@ end
 end
 
 # provision
+config.vm.provision "shell", :inline => "echo 'Defaults:vagrant !requiretty' >>  /etc/sudoers.d/vagrant"
 config.vm.provision :shell, :path => "provision.sh", :args => "192.168.200.10"
 #  config.vm.provision "shell", path: 'provision/scripts/provision.sh', privileged: false
 config.vm.provision :shell, :path => "test.sh", :args => "192.168.200.10"
