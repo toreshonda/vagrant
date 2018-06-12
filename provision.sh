@@ -1,13 +1,12 @@
 #!/bin/bash
 # install other soft for kubernetes
     echo -e "1q2wroot3e4r\n1q2wroot3e4r\n" | passwd root
+	sudo su
     yum update -y
-    yum -y install mc nano git docker wget
-    yum -y install epel-release
-    yum -y install dkms net-tools bind-tools
-    yum -y groupinstall "Development Tools"
-    yum -y install gcc-c++
-    yum -y install kernel-devel
+    yum -y install mc nano git docker wget net-tools
+    # yum -y install epel-release
+    # yum -y install dkms net-tools
+    # yum -y install kernel-devel
 #firewall-cmd --permanent --add-port=6443/tcp
 #firewall-cmd --permanent --add-port=2379-2380/tcp
 #firewall-cmd --permanent --add-port=10250/tcp
@@ -15,9 +14,7 @@
 #firewall-cmd --permanent --add-port=10252/tcp
 #firewall-cmd --permanent --add-port=10255/tcp
 #firewall-cmd --reload
-echo 'hello1'
 modprobe br_netfilter
-
 echo '1' > /proc/sys/net/bridge/bridge-nf-call-iptables
 
 cat <<EOF > /etc/sysctl.d/k8s.conf
@@ -40,7 +37,7 @@ gpgkey=https://packages.cloud.google.com/yum/doc/yum-key.gpg
          https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg
 EOF
 
-echo "kreate kubeadm.yaml file"
+echo "create kubeadm.yaml file"
 
 cat <<EOF > kubeadm.yaml
 apiVersion: kubeadm.k8s.io/v1alpha1
@@ -61,11 +58,15 @@ systemctl  restart kubelet && systemctl enable kubelet
 #Disable SWAP
     sed -i 's/\(.*swap.*\)/#\1/g' /etc/fstab
     swapoff -a
+#kubernetes cluster init
     kubeadm reset
     kubeadm init --config=kubeadm.yaml
-    sudo cp /etc/kubernetes/admin.conf $HOME/
-sudo chown $(id -u):$(id -g) $HOME/admin.conf
-export KUBECONFIG=$HOME/admin.conf
+	mkdir -p $HOME/.kube
+    cp /etc/kubernetes/admin.conf $HOME/.kube/config
+	cp /etc/kubernetes/admin.conf /vagrant/admin.conf
+    chown $(id -u):$(id -g) $HOME/.kube	
+    export KUBECONFIG=$HOME/.kube/config
+	kubect token create --print-join-command >> /vagrant/join.file
     kubectl apply -n kube-system -f "https://cloud.weave.works/k8s/net?k8s-version=$(kubectl version | base64 | tr -d '\n')"
     
     git clone https://github.com/kubernetes/heapster.git
